@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+
+  foodLogs  FoodLog[]
+  foods     Food[]    @relation("UserFoods")
+}
+
+model Food {
+  id           String   @id @default(cuid())
+  name         String
+  calories     Float    // calories per 100g or 100ml
+  protein      Float?   // g per 100
+  carbs        Float?   // g per 100
+  fat          Float?   // g per 100
+  unit         String   @default("g") // "g" or "ml"
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  userId       String?
+  user         User?    @relation("UserFoods", fields: [userId], references: [id])
+
+  foodLogs     FoodLogItem[]
+}
+
+model FoodLog {
+  id        String        @id @default(cuid())
+  date      DateTime      @db.Date
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  createdAt DateTime      @default(now())
+
+  items     FoodLogItem[]
+
+  @@unique([userId, date])
+}
+
+model FoodLogItem {
+  id         String   @id @default(cuid())
+  quantity   Float    // in g or ml
+  mealType   String   @default("other") // breakfast, lunch, dinner, snack, other
+  createdAt  DateTime @default(now())
+
+  foodLogId  String
+  foodLog    FoodLog  @relation(fields: [foodLogId], references: [id], onDelete: Cascade)
+
+  foodId     String
+  food       Food     @relation(fields: [foodId], references: [id])
+}

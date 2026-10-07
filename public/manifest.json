@@ -1,0 +1,21 @@
+{
+  "name": "Calo - Suivi des calories",
+  "short_name": "Calo",
+  "description": "Application simple et minimaliste pour suivre vos calories.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1ea858",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

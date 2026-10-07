@@ -16,6 +16,8 @@ model User {
 
   foodLogs  FoodLog[]
   foods     Food[]    @relation("UserFoods")
+
+  @@map("User_Calo")
 }
 
 model Food {

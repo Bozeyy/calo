@@ -26,4 +26,11 @@ Application web de suivi quotidien des calories construite avec Next.js (App Rou
 
 ### Base de données (`prisma/`)
 - Schéma Prisma connecté à PostgreSQL (Railway).
-- Modèles : `User`, `FoodItem`, `FoodLog`, `FoodLogItem`.
+- Modèles : `User` (mappé vers la table `User_Calo`), `FoodItem`, `FoodLog`, `FoodLogItem`.
+
+### Responsive & PWA
+- Adaptation mobile complète (< 600px) :
+  - Barre de navigation fixée en bas de l'écran avec safe-area iOS (`env(safe-area-inset-bottom)`).
+  - En-tête de page optimisé : titre et sélecteur de date disposés verticalement sur toute la largeur, sans écrasement de texte.
+  - Cartes et grilles de statistiques compactes (padding ajusté, suppression des marges et largeurs rigides).
+  - PWA installable avec `manifest.json`, icônes applicatives et gestion de l'invite `beforeinstallprompt`.

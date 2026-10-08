@@ -14,6 +14,13 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
+  weight        Float?
+  height        Float?
+  age           Int?
+  gender        String? // 'M' or 'F'
+  activityLevel String? // 'sedentary', 'light', 'moderate', 'active', 'very_active'
+  dailyTarget   Int?    // To store the calculated or custom target
+
   foodLogs  FoodLog[]
   foods     Food[]    @relation("UserFoods")
 

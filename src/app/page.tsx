@@ -35,7 +35,10 @@ const MEAL_LABELS: Record<string, string> = {
 const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack', 'other']
 
 function formatDate(d: Date): string {
-  return d.toISOString().split('T')[0]
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function displayDate(dateStr: string, todayStr: string): string {
@@ -131,6 +134,7 @@ export default function HomePage() {
   const [log, setLog] = useState<DayLog | null>(null)
   const [weekLogs, setWeekLogs] = useState<{ date: string; total: number }[]>([])
   const [loading, setLoading] = useState(true)
+  const [userTarget, setUserTarget] = useState(2000)
 
   const fetchLog = useCallback(async () => {
     if (!date) return
@@ -145,6 +149,14 @@ export default function HomePage() {
     const todayStr = formatDate(new Date())
     setToday(todayStr)
     setDate(todayStr)
+    
+    // Fetch user target
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(data => {
+        if (data.dailyTarget) setUserTarget(data.dailyTarget)
+      })
+      .catch(e => console.error(e))
   }, [])
 
   useEffect(() => {
@@ -187,7 +199,7 @@ export default function HomePage() {
   const totalCarbs = items.reduce((s, i) => s + calcMacro(i, 'carbs'), 0)
   const totalFat = items.reduce((s, i) => s + calcMacro(i, 'fat'), 0)
 
-  const TARGET = 2000
+  const TARGET = userTarget
   const pct = Math.min(100, Math.round((totalCals / TARGET) * 100))
 
   const byMeal = MEAL_ORDER.reduce<Record<string, FoodLogItem[]>>((acc, m) => {
@@ -202,7 +214,7 @@ export default function HomePage() {
       <Sidebar />
       <main className="main-content">
         <div className="page-header">
-          <div className="flex items-center justify-between">
+          <div className="page-header-row">
             <div>
               <h1 className="page-title">Journal alimentaire</h1>
               <div className="page-subtitle">Suivez votre apport calorique quotidien</div>
@@ -249,7 +261,7 @@ export default function HomePage() {
             </div>
             <div className="stat-card">
               <div className="stat-label">Repas</div>
-              <div className="stat-value" style={{ fontSize: 32 }}>
+              <div className="stat-value">
                 {items.length}
               </div>
               <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginTop: 4 }}>aliments consommés</div>

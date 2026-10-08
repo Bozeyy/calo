@@ -62,7 +62,7 @@ export default function FoodsPage() {
       <Sidebar />
       <main className="main-content">
         <div className="page-header">
-          <div className="flex items-center justify-between">
+          <div className="page-header-row">
             <div>
               <h1 className="page-title">Aliments</h1>
               <div className="page-subtitle">{foods.length} aliments disponibles</div>

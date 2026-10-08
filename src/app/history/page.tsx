@@ -67,7 +67,7 @@ export default function HistoryPage() {
           ) : (
             <>
               {/* Summary card */}
-              <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 32 }}>
+              <div className="card history-summary" style={{ marginBottom: 20 }}>
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--color-text-3)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Jours enregistrés</div>
                   <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: -1 }}>{logs.length}</div>

@@ -9,7 +9,7 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
-      select: { weight: true, height: true, age: true, gender: true, activityLevel: true, dailyTarget: true, name: true, email: true }
+      select: { weight: true, height: true, age: true, gender: true, activityLevel: true, dailyTarget: true, objective: true, weightGoalRate: true, name: true, email: true }
     })
     return NextResponse.json(user)
   } catch (error) {
@@ -23,7 +23,7 @@ export async function PUT(req: Request) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const data = await req.json()
-    const { weight, height, age, gender, activityLevel, dailyTarget } = data
+    const { weight, height, age, gender, activityLevel, dailyTarget, objective, weightGoalRate } = data
 
     const user = await prisma.user.update({
       where: { id: session.userId },
@@ -34,8 +34,10 @@ export async function PUT(req: Request) {
         gender: gender || null,
         activityLevel: activityLevel || null,
         dailyTarget: dailyTarget ? parseInt(dailyTarget) : null,
+        objective: objective || null,
+        weightGoalRate: weightGoalRate ? parseFloat(weightGoalRate) : null,
       },
-      select: { weight: true, height: true, age: true, gender: true, activityLevel: true, dailyTarget: true, name: true, email: true }
+      select: { weight: true, height: true, age: true, gender: true, activityLevel: true, dailyTarget: true, objective: true, weightGoalRate: true, name: true, email: true }
     })
 
     return NextResponse.json(user)

@@ -18,8 +18,10 @@ model User {
   height        Float?
   age           Int?
   gender        String? // 'M' or 'F'
-  activityLevel String? // 'sedentary', 'light', 'moderate', 'active', 'very_active'
-  dailyTarget   Int?    // To store the calculated or custom target
+  activityLevel  String? // 'sedentary', 'light', 'moderate', 'active', 'very_active'
+  objective      String? // 'lose', 'maintain', 'gain'
+  weightGoalRate Float?  // kg per week (e.g. 0.5)
+  dailyTarget    Int?    // To store the calculated or custom target
 
   foodLogs  FoodLog[]
   foods     Food[]    @relation("UserFoods")

@@ -12,6 +12,8 @@ export default function ProfilePage() {
     age: '',
     gender: 'M',
     activityLevel: 'sedentary',
+    objective: 'maintain',
+    weightGoalRate: '0.5',
     dailyTarget: ''
   })
   const [loading, setLoading] = useState(true)
@@ -32,6 +34,8 @@ export default function ProfilePage() {
           age: data.age?.toString() || '',
           gender: data.gender || 'M',
           activityLevel: data.activityLevel || 'sedentary',
+          objective: data.objective || 'maintain',
+          weightGoalRate: data.weightGoalRate?.toString() || '0.5',
           dailyTarget: data.dailyTarget?.toString() || ''
         })
         setLoading(false)
@@ -70,9 +74,20 @@ export default function ProfilePage() {
 
     const tdee = Math.round(bmr * (multipliers[profile.activityLevel] || 1.2))
     setCalculatedTdee(tdee)
-    setProfile(prev => ({ ...prev, dailyTarget: tdee.toString() }))
+
+    let finalTarget = tdee
+    let rate = parseFloat(profile.weightGoalRate) || 0
+    let modifier = Math.round((rate * 7700) / 7)
+
+    if (profile.objective === 'lose') {
+      finalTarget -= modifier
+    } else if (profile.objective === 'gain') {
+      finalTarget += modifier
+    }
+
+    setProfile(prev => ({ ...prev, dailyTarget: finalTarget.toString() }))
     setStatusMessage({
-      text: `Calcul terminé ! Vos besoins estimés sont de ${tdee} kcal/jour. Vous pouvez enregistrer ce choix.`,
+      text: `Calcul terminé ! TDEE: ${tdee} kcal/j. Cible finale ajustée à ${finalTarget} kcal/j en fonction de votre objectif.`,
       type: 'success'
     })
   }
@@ -242,6 +257,65 @@ export default function ProfilePage() {
                   </select>
                 </div>
 
+                {/* Objectif de poids */}
+                <div className="form-group">
+                  <label className="form-label">Objectif de poids</label>
+                  <div className="profile-segmented-control" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                    <button
+                      type="button"
+                      className={`profile-segment-btn ${profile.objective === 'lose' ? 'active' : ''}`}
+                      onClick={() => setProfile({ ...profile, objective: 'lose' })}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                        <polyline points="17 18 23 18 23 12" />
+                      </svg>
+                      Perte
+                    </button>
+                    <button
+                      type="button"
+                      className={`profile-segment-btn ${profile.objective === 'maintain' ? 'active' : ''}`}
+                      onClick={() => setProfile({ ...profile, objective: 'maintain' })}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                      </svg>
+                      Maintien
+                    </button>
+                    <button
+                      type="button"
+                      className={`profile-segment-btn ${profile.objective === 'gain' ? 'active' : ''}`}
+                      onClick={() => setProfile({ ...profile, objective: 'gain' })}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                        <polyline points="17 6 23 6 23 12" />
+                      </svg>
+                      Prise
+                    </button>
+                  </div>
+                </div>
+
+                {profile.objective !== 'maintain' && (
+                  <div className="form-group">
+                    <label className="form-label">Rythme cible ({profile.objective === 'lose' ? 'Perte' : 'Prise'} par semaine)</label>
+                    <div className="profile-input-group">
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        max="1.5"
+                        className="form-input"
+                        value={profile.weightGoalRate}
+                        onChange={e => setProfile({ ...profile, weightGoalRate: e.target.value })}
+                        placeholder="0.5"
+                        style={{ paddingRight: '70px' }}
+                      />
+                      <span className="profile-input-suffix">kg / sem</span>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   type="button"
                   className="btn btn-ghost"
@@ -304,7 +378,13 @@ export default function ProfilePage() {
 
                 {calculatedTdee && (
                   <div style={{ fontSize: '13px', color: 'var(--color-text-2)', background: 'var(--color-surface-2)', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
-                    💡 <strong>Conseil :</strong> Pour une perte de poids durable, visez un déficit d&apos;environ 300 à 500 kcal ({calculatedTdee - 400} kcal). Pour une prise de masse, un surplus de 200 à 300 kcal ({calculatedTdee + 250} kcal).
+                    💡 <strong>Conseil :</strong> 
+                    {profile.objective === 'maintain' 
+                      ? ` Votre métabolisme de maintien (TDEE) est de ${calculatedTdee} kcal. Consommez cette quantité pour garder un poids stable.`
+                      : profile.objective === 'lose'
+                      ? ` Pour perdre ${profile.weightGoalRate || 0} kg par semaine, un déficit de ${Math.round((parseFloat(profile.weightGoalRate) || 0) * 7700 / 7)} kcal/jour est appliqué sur votre TDEE de ${calculatedTdee} kcal.`
+                      : ` Pour prendre ${profile.weightGoalRate || 0} kg par semaine, un surplus de ${Math.round((parseFloat(profile.weightGoalRate) || 0) * 7700 / 7)} kcal/jour est appliqué sur votre TDEE de ${calculatedTdee} kcal.`
+                    }
                   </div>
                 )}
               </div>

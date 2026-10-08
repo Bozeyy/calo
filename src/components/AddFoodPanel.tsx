@@ -60,7 +60,11 @@ export default function AddFoodPanel({ date, onAdded }: Props) {
   }
 
   const previewCals = selected
-    ? Math.round((selected.calories * parseFloat(quantity || '0')) / 100)
+    ? Math.round(
+        (selected.unit === 'g' || selected.unit === 'ml')
+          ? (selected.calories * parseFloat(quantity || '0')) / 100
+          : selected.calories * parseFloat(quantity || '0')
+      )
     : 0
 
   return (
@@ -95,11 +99,13 @@ export default function AddFoodPanel({ date, onAdded }: Props) {
               <div
                 key={food.id}
                 className={`food-result-item ${selected?.id === food.id ? 'selected' : ''}`}
-                onClick={() => setSelected(food)}
+                onClick={() => { setSelected(food); setQuantity((food.unit === 'g' || food.unit === 'ml') ? '100' : '1') }}
               >
                 <div>
                   <div className="food-result-name">{food.name}</div>
-                  <div className="food-result-cals">{food.calories} kcal / 100{food.unit}</div>
+                  <div className="food-result-cals">
+                    {food.calories} kcal / {food.unit === 'g' || food.unit === 'ml' ? `100${food.unit}` : `1 ${food.unit}`}
+                  </div>
                 </div>
                 {!food.isDefault && (
                   <span className="food-result-badge">Perso</span>
@@ -114,7 +120,7 @@ export default function AddFoodPanel({ date, onAdded }: Props) {
             <div style={{ padding: '10px 12px', background: 'var(--color-accent-light)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--color-accent)' }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-accent)' }}>{selected.name}</div>
               <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginTop: 2 }}>
-                {selected.calories} kcal / 100{selected.unit}
+                {selected.calories} kcal / {selected.unit === 'g' || selected.unit === 'ml' ? `100${selected.unit}` : `1 ${selected.unit}`}
               </div>
             </div>
 

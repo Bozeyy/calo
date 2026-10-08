@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 interface FoodLogItem {
   id: string
   quantity: number
-  food: { calories: number }
+  food: { calories: number; unit: string }
 }
 
 interface DayLog {
@@ -16,7 +16,11 @@ interface DayLog {
 }
 
 function calcTotal(items: FoodLogItem[]) {
-  return items.reduce((s, i) => s + Math.round((i.food.calories * i.quantity) / 100), 0)
+  return items.reduce((s, i) => {
+    const isPer100 = i.food.unit === 'g' || i.food.unit === 'ml'
+    const calories = isPer100 ? (i.food.calories * i.quantity) / 100 : (i.food.calories * i.quantity)
+    return s + Math.round(calories)
+  }, 0)
 }
 
 function IconChevron({ dir }: { dir: 'right' }) {
@@ -29,18 +33,38 @@ function IconChevron({ dir }: { dir: 'right' }) {
 
 export default function HistoryPage() {
   const [logs, setLogs] = useState<DayLog[]>([])
+  const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/logs')
-      .then(r => r.json())
-      .then(data => {
-        setLogs(data)
-        setLoading(false)
-      })
+    Promise.all([
+      fetch('/api/logs').then(r => r.json()),
+      fetch('/api/profile').then(r => r.json())
+    ])
+    .then(([logsData, profileData]) => {
+      setLogs(logsData)
+      setProfile(profileData)
+      setLoading(false)
+    })
   }, [])
 
-  const TARGET = 2000
+  let maintenanceTdee = 2000
+  if (profile && profile.weight && profile.height && profile.age) {
+    let bmr = (10 * profile.weight) + (6.25 * profile.height) - (5 * profile.age)
+    if (profile.gender === 'M') bmr += 5
+    else bmr -= 161
+
+    const multipliers: Record<string, number> = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      very_active: 1.9
+    }
+    maintenanceTdee = Math.round(bmr * (multipliers[profile.activityLevel] || 1.2))
+  }
+
+  const TARGET = profile?.dailyTarget || maintenanceTdee
 
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
@@ -96,6 +120,10 @@ export default function HistoryPage() {
                   const d = new Date(log.date)
                   const total = calcTotal(log.items)
                   const pct = Math.min(100, Math.round((total / TARGET) * 100))
+                  const diffKcal = total - maintenanceTdee
+                  const weightDiff = diffKcal / 7700
+                  const weightDiffStr = weightDiff > 0 ? `+${weightDiff.toFixed(2)}kg` : `${weightDiff.toFixed(2)}kg`
+                  
                   return (
                     <a key={log.id} href={`/?date=${log.date.split('T')[0]}`} className="history-item">
                       <div className="history-date">
@@ -104,8 +132,11 @@ export default function HistoryPage() {
                       </div>
                       <div className="history-divider" />
                       <div className="history-info">
-                        <div className="history-cals">
-                          {total} <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--color-text-3)' }}>kcal</span>
+                        <div className="history-cals" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div>{total} <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--color-text-3)' }}>kcal</span></div>
+                          <div style={{ fontSize: 12, fontWeight: 600, padding: '2px 6px', borderRadius: '4px', background: 'var(--color-surface-2)', color: weightDiff > 0 ? 'var(--color-danger)' : (weightDiff < 0 ? 'var(--color-accent)' : 'var(--color-text-3)') }}>
+                            {weightDiffStr}
+                          </div>
                         </div>
                         <div className="history-items-count">{log.items.length} aliment{log.items.length > 1 ? 's' : ''}</div>
                         <div className="history-bar">
@@ -131,6 +162,7 @@ export default function HistoryPage() {
                 })}
               </div>
             </>
+
           )}
         </div>
       </main>

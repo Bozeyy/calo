@@ -55,12 +55,14 @@ function displayDate(dateStr: string, todayStr: string): string {
 }
 
 function calcCals(item: FoodLogItem) {
-  return Math.round((item.food.calories * item.quantity) / 100)
+  const isPer100 = item.food.unit === 'g' || item.food.unit === 'ml'
+  return Math.round(isPer100 ? (item.food.calories * item.quantity) / 100 : (item.food.calories * item.quantity))
 }
 function calcMacro(item: FoodLogItem, key: 'protein' | 'carbs' | 'fat') {
   const v = item.food[key]
   if (v === null) return 0
-  return Math.round((v * item.quantity) / 100 * 10) / 10
+  const isPer100 = item.food.unit === 'g' || item.food.unit === 'ml'
+  return Math.round(isPer100 ? (v * item.quantity) / 100 * 10 : (v * item.quantity) * 10) / 10
 }
 
 function IconTrash() {
@@ -316,7 +318,8 @@ export default function HomePage() {
                           <div className="log-item-info">
                             <div className="log-item-name">{item.food.name}</div>
                             <div className="log-item-meta">
-                              {item.quantity}{item.food.unit}
+                              {item.quantity} {item.food.unit === 'pièce' && item.quantity > 1 ? 'pièces' : item.food.unit}
+
                               {item.food.protein !== null && ` · P: ${calcMacro(item, 'protein')}g`}
                               {item.food.carbs !== null && ` · G: ${calcMacro(item, 'carbs')}g`}
                               {item.food.fat !== null && ` · L: ${calcMacro(item, 'fat')}g`}

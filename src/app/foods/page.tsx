@@ -136,7 +136,9 @@ export default function FoodsPage() {
                     {food.calories}
                     <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--color-text-3)' }}> kcal</span>
                   </div>
-                  <div className="food-card-sub">pour 100{food.unit}</div>
+                  <div className="food-card-sub">
+                    pour {food.unit === 'g' || food.unit === 'ml' ? `100${food.unit}` : `1 ${food.unit}`}
+                  </div>
 
                   {(food.protein !== null || food.carbs !== null || food.fat !== null) && (
                     <div className="food-card-macros">

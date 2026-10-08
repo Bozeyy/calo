@@ -87,12 +87,17 @@ export default function AddFoodModal({ onCreated, onClose }: Props) {
               <select name="unit" className="form-select" value={form.unit} onChange={handleChange} id="food-unit-select">
                 <option value="g">g (gramme)</option>
                 <option value="ml">ml (millilitre)</option>
+                <option value="pièce">pièce</option>
+                <option value="c.à.s.">cuillère à soupe (c.à.s.)</option>
+                <option value="c.à.c.">cuillère à café (c.à.c.)</option>
               </select>
             </div>
           </div>
 
           <div style={{ fontSize: 12, color: 'var(--color-text-3)', marginTop: -6 }}>
-            Valeurs nutritionnelles pour 100g / 100ml
+            {form.unit === 'g' || form.unit === 'ml' 
+              ? `Valeurs nutritionnelles pour 100${form.unit}` 
+              : `Valeurs nutritionnelles pour 1 ${form.unit}`}
           </div>
 
           <div className="form-row-3">
